@@ -14,17 +14,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy to All-Inkl
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: nick-fields/retry@v2
         with:
-          server: ${{ secrets.PRD_HOST }}
-          username: ${{ secrets.PRD_USER }}
-          password: ${{ secrets.PRD_PASSWORD }}
-          protocol: ftp
-          port: 21
-          server-dir: /
-          timeout: 600000
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.DS_Store
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 30
+          shell: bash
+          command: |
+            npx ftp-deploy --user "${{ secrets.PRD_USER }}" --password "${{ secrets.PRD_PASSWORD }}" --host "${{ secrets.PRD_HOST }}" --port 21 --local-root "." --server-root "/" --exclude ".git/" --exclude "node_modules/" --exclude ".DS_Store" --delete --verbose
